@@ -124,7 +124,15 @@ app.post("/quotes", (req, res) => {
       age: req.body.age,
       image: req.body.image,
     };
+
+    quotes.push(quote)
+
+    res.send(quote)
+  } else {
+    res.status(400).send({errors: errors})
   }
+
+ 
 });
 
 app.listen(PORT, () => {
