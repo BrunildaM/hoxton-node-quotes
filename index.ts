@@ -146,18 +146,6 @@ app.post("/quotes", (req, res) => {
       "Make sure you have an author by his authorId and it is a number"
     );
 
-  //   if (typeof req.body.firstName !== "string")
-  //     errors.push("Make sure you have a firstName and it is a string");
-
-  //   if (typeof req.body.lastName !== "string")
-  //     errors.push("Make sure you have a lastName and it is a string");
-
-  //   if (typeof req.body.age !== "number")
-  //     errors.push("Make sure you have an age and it is a number");
-
-  //   if (typeof req.body.image !== "string")
-  //     errors.push("Make sure you have an image and it is a string");
-
   if (errors.length === 0) {
     let quote: Quote = {
       id: Math.random(),
@@ -208,6 +196,41 @@ app.delete("/quotes/:id", (req, res) => {
     res.send({ message: "Quote deleted successfully!" });
   } else {
     res.status(404).send({ error: "Quote not found!" });
+  }
+});
+
+app.get("/authors", (req, res) => {
+  res.send(authors);
+});
+
+app.post("/authors", (req, res) => {
+  const errors: string[] = [];
+
+  if (typeof req.body.firstName !== "string")
+    errors.push("Make sure you have a firstName and it is a string");
+
+  if (typeof req.body.lastName !== "string")
+    errors.push("Make sure you have a lastName and it is a string");
+
+  if (typeof req.body.age !== "number")
+    errors.push("Make sure you have an age and it is a number");
+
+  if (typeof req.body.image !== "string")
+    errors.push("Make sure you have an image and it is a string");
+
+  if (errors.length === 0) {
+    const author: Author = {
+      id: Math.random(),
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      age: req.body.age,
+      image: req.body.image,
+    };
+
+    authors = [...authors, author];
+    res.send(author);
+  } else {
+    res.status(400).send({ errors: errors });
   }
 });
 
