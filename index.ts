@@ -15,7 +15,7 @@ type Quote = {
   image: string;
 };
 
-const quotes: Quote[] = [
+let quotes: Quote[] = [
   {
     id: 1,
     quote: `Tell me and I forget. Teach me and I remember. Involve me and I learn.`,
@@ -146,13 +146,26 @@ app.patch("/quotes/:id", (req, res) => {
     if (typeof lastName === "string") match.lastName = lastName;
     if (typeof age === "number") match.age = age;
     if (typeof image === "string") match.image = image;
+    res.send(match)
   } else {
     res.status(404).send({ error: "We could not find this id" });
   }
 });
 
 
-app.delete('/quotes/:id', (req, res) => {})
+app.delete('/quotes/:id', (req, res) => {
+    const id = Number(req.params.id)
+
+    const match = quotes.find(quote => quote.id === id)
+
+    if (match) {
+        quotes = quotes.filter(quote => quote.id !== id)
+        res.send({ message: 'Quote deleted successfully!'})
+    } else {
+        res.status(404).send({error: 'Quote not found!'})
+    }
+
+})
 
 app.listen(PORT, () => {
   console.log(`Server up on: http://localhost:${PORT}`);
