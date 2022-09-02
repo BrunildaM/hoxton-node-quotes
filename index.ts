@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import cors from "cors";
 
 const app = express();
@@ -9,16 +9,20 @@ const PORT = 4000;
 type Quote = {
   id: number;
   quote: string;
+  authorId: number;
+};
+
+type Author = {
+  id: number;
   firstName: string;
   lastName: string;
   age: number;
   image: string;
 };
 
-let quotes: Quote[] = [
+let authors: Author[] = [
   {
     id: 1,
-    quote: `Tell me and I forget. Teach me and I remember. Involve me and I learn.`,
     firstName: `-Benjamin `,
     lastName: "Franklin",
     age: 84,
@@ -27,7 +31,6 @@ let quotes: Quote[] = [
   },
   {
     id: 2,
-    quote: `Never let the fear of striking out keep you from playing the game.`,
     firstName: `-Babe `,
     lastName: "Ruth",
     age: 53,
@@ -36,7 +39,6 @@ let quotes: Quote[] = [
   },
   {
     id: 3,
-    quote: `Remember that not getting what you want is sometimes a wonderful stroke of luck.`,
     firstName: `-Dalai `,
     lastName: "Lama",
     age: 87,
@@ -45,7 +47,6 @@ let quotes: Quote[] = [
   },
   {
     id: 4,
-    quote: `Our lives begin to end the day we become silent about things that matter.`,
     firstName: `-Martin Luther `,
     lastName: "King, Jr.",
     age: 39,
@@ -54,7 +55,6 @@ let quotes: Quote[] = [
   },
   {
     id: 5,
-    quote: `Do, or do not. There is no try.`,
     firstName: `-Yoda`,
     lastName: "",
     age: 900,
@@ -63,7 +63,6 @@ let quotes: Quote[] = [
   },
   {
     id: 6,
-    quote: `We delight in the beauty of the butterfly, but rarely admit the changes it has gone through to achieve that beauty.`,
     firstName: `-Maya `,
     lastName: "Angelou",
     age: 86,
@@ -72,11 +71,51 @@ let quotes: Quote[] = [
   },
 ];
 
+let quotes: Quote[] = [
+  {
+    id: 1,
+    quote: `Tell me and I forget. Teach me and I remember. Involve me and I learn.`,
+    authorId: 1,
+  },
+  {
+    id: 2,
+    quote: `Never let the fear of striking out keep you from playing the game.`,
+    authorId: 2,
+  },
+  {
+    id: 3,
+    quote: `Remember that not getting what you want is sometimes a wonderful stroke of luck.`,
+    authorId: 3,
+  },
+  {
+    id: 4,
+    quote: `Our lives begin to end the day we become silent about things that matter.`,
+    authorId: 4,
+  },
+  {
+    id: 5,
+    quote: `Do, or do not. There is no try.`,
+    authorId: 5,
+  },
+  {
+    id: 6,
+    quote: `We delight in the beauty of the butterfly, but rarely admit the changes it has gone through to achieve that beauty.`,
+    authorId: 6,
+  },
+];
+
 app.get("/", (req, res) => {
   res.send("Welcome to my API!");
 });
 
 app.get("/quotes", (req, res) => {
+  let quotesCopy = JSON.parse(JSON.stringify(quotes));
+
+  for (const quote of quotesCopy) {
+    const author = authors.find((author) => author.id === quote.authorId);
+    quote.author = author;
+  }
+
   res.send(quotes);
 });
 
@@ -102,27 +141,32 @@ app.post("/quotes", (req, res) => {
 
   if (typeof req.body.quote !== "string")
     errors.push("Make sure you have a quote and it is a string");
+  if (typeof req.body.authorId !== "number")
+    errors.push(
+      "Make sure you have an author by his authorId and it is a number"
+    );
 
-  if (typeof req.body.firstName !== "string")
-    errors.push("Make sure you have a firstName and it is a string");
+  //   if (typeof req.body.firstName !== "string")
+  //     errors.push("Make sure you have a firstName and it is a string");
 
-  if (typeof req.body.lastName !== "string")
-    errors.push("Make sure you have a lastName and it is a string");
+  //   if (typeof req.body.lastName !== "string")
+  //     errors.push("Make sure you have a lastName and it is a string");
 
-  if (typeof req.body.age !== "number")
-    errors.push("Make sure you have an age and it is a number");
+  //   if (typeof req.body.age !== "number")
+  //     errors.push("Make sure you have an age and it is a number");
 
-  if (typeof req.body.image !== "string")
-    errors.push("Make sure you have an image and it is a string");
+  //   if (typeof req.body.image !== "string")
+  //     errors.push("Make sure you have an image and it is a string");
 
   if (errors.length === 0) {
     let quote: Quote = {
       id: Math.random(),
       quote: req.body.quote,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      age: req.body.age,
-      image: req.body.image,
+      authorId: req.body.authorId,
+      //   firstName: req.body.firstName,
+      //   lastName: req.body.lastName,
+      //   age: req.body.age,
+      //   image: req.body.image,
     };
 
     quotes.push(quote);
@@ -136,36 +180,36 @@ app.post("/quotes", (req, res) => {
 app.patch("/quotes/:id", (req, res) => {
   const id = Number(req.params.id);
 
-  const { quote, firstName, lastName, age, image } = req.body;
+  const { quote, authorId } = req.body;
 
   const match = quotes.find((quote) => quote.id === id);
 
   if (match) {
     if (typeof quote === "string") match.quote = quote;
-    if (typeof firstName === "string") match.firstName = firstName;
-    if (typeof lastName === "string") match.lastName = lastName;
-    if (typeof age === "number") match.age = age;
-    if (typeof image === "string") match.image = image;
-    res.send(match)
+    if (typeof authorId === "number") match.authorId = authorId;
+
+    // if (typeof firstName === "string") match.firstName = firstName;
+    // if (typeof lastName === "string") match.lastName = lastName;
+    // if (typeof age === "number") match.age = age;
+    // if (typeof image === "string") match.image = image;
+    res.send(match);
   } else {
     res.status(404).send({ error: "We could not find this id" });
   }
 });
 
+app.delete("/quotes/:id", (req, res) => {
+  const id = Number(req.params.id);
 
-app.delete('/quotes/:id', (req, res) => {
-    const id = Number(req.params.id)
+  const match = quotes.find((quote) => quote.id === id);
 
-    const match = quotes.find(quote => quote.id === id)
-
-    if (match) {
-        quotes = quotes.filter(quote => quote.id !== id)
-        res.send({ message: 'Quote deleted successfully!'})
-    } else {
-        res.status(404).send({error: 'Quote not found!'})
-    }
-
-})
+  if (match) {
+    quotes = quotes.filter((quote) => quote.id !== id);
+    res.send({ message: "Quote deleted successfully!" });
+  } else {
+    res.status(404).send({ error: "Quote not found!" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server up on: http://localhost:${PORT}`);
