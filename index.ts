@@ -200,6 +200,14 @@ app.delete("/quotes/:id", (req, res) => {
 });
 
 app.get("/authors", (req, res) => {
+  const authorsCopy = JSON.parse(JSON.stringify(authors));
+
+  for (const author of authorsCopy) {
+    const quotesByAuthor = quotes.filter(
+      (quote) => quote.authorId === author.id
+    );
+    author.quotes = quotesByAuthor;
+  }
   res.send(authors);
 });
 
