@@ -112,7 +112,7 @@ app.post("/quotes", (req, res) => {
   if (typeof req.body.age !== "number")
     errors.push("Make sure you have an age and it is a number");
 
-  if (typeof req.body.quote !== "string")
+  if (typeof req.body.image !== "string")
     errors.push("Make sure you have an image and it is a string");
 
   if (errors.length === 0) {
@@ -125,15 +125,34 @@ app.post("/quotes", (req, res) => {
       image: req.body.image,
     };
 
-    quotes.push(quote)
+    quotes.push(quote);
 
-    res.send(quote)
+    res.send(quote);
   } else {
-    res.status(400).send({errors: errors})
+    res.status(400).send({ errors: errors });
   }
-
- 
 });
+
+app.patch("/quotes/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const { quote, firstName, lastName, age, image } = req.body;
+
+  const match = quotes.find((quote) => quote.id === id);
+
+  if (match) {
+    if (typeof quote === "string") match.quote = quote;
+    if (typeof firstName === "string") match.firstName = firstName;
+    if (typeof lastName === "string") match.lastName = lastName;
+    if (typeof age === "number") match.age = age;
+    if (typeof image === "string") match.image = image;
+  } else {
+    res.status(404).send({ error: "We could not find this id" });
+  }
+});
+
+
+app.delete('/quotes/:id', (req, res) => {})
 
 app.listen(PORT, () => {
   console.log(`Server up on: http://localhost:${PORT}`);
